@@ -1,23 +1,19 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux'
-import {goBack, closeModal, setStory} from "./js/store/router/actions";
+import {goBack, closeModal} from "./js/store/router/actions";
 import {getActivePanel} from "./js/services/_functions";
 import * as VK from './js/services/VK';
 
-import {Epic, View, Root, Tabbar, ModalRoot, TabbarItem, ConfigProvider} from "@vkontakte/vkui";
+import {View, Root, ModalRoot, ConfigProvider} from "@vkontakte/vkui";
 
-import Icon28Newsfeed from '@vkontakte/icons/dist/28/newsfeed';
-import Icon28More from '@vkontakte/icons/dist/28/more';
-
-import HomePanelBase from './js/panels/home/base';
+import HomePanelProfile from './js/panels/home/base';
 import HomePanelGroups from './js/panels/home/groups';
-
-import MorePanelBase from './js/panels/more/base';
-import MorePanelExample from './js/panels/more/example';
 
 import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
 import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
+
+import MorePanelExample from './js/panels/more/example';
 
 class App extends React.Component {
     constructor(props) {
@@ -26,7 +22,7 @@ class App extends React.Component {
         this.lastAndroidBackAction = 0;
     }
 
-    componentDidMount() {
+    componentWillMount() {
         const {goBack, dispatch} = this.props;
 
         dispatch(VK.initApp());
@@ -59,7 +55,7 @@ class App extends React.Component {
     }
 
     render() {
-        const {goBack, setStory, closeModal, popouts, activeView, activeStory, activeModals, panelsHistory, colorScheme} = this.props;
+        const {goBack, closeModal, popouts, activeView, activeModals, panelsHistory, colorScheme} = this.props;
 
         let history = (panelsHistory[activeView] === undefined) ? [activeView] : panelsHistory[activeView];
         let popout = (popouts[activeView] === undefined) ? null : popouts[activeView];
@@ -80,51 +76,27 @@ class App extends React.Component {
 
         return (
             <ConfigProvider isWebView={true} scheme={colorScheme}>
-                <Epic activeStory={activeStory} tabbar={
-                    <Tabbar>
-                        <TabbarItem
-                            onClick={() => setStory('home', 'base')}
-                            selected={activeStory === 'home'}
-                        ><Icon28Newsfeed/></TabbarItem>
-                        <TabbarItem
-                            onClick={() => setStory('more', 'callmodal')}
-                            selected={activeStory === 'more'}
-                        ><Icon28More/></TabbarItem>
-                    </Tabbar>
-                }>
-                    <Root id="home" activeView={activeView} popout={popout}>
-                        <View
-                            id="home"
-                            modal={homeModals}
-                            activePanel={getActivePanel("home")}
-                            history={history}
-                            onSwipeBack={() => goBack()}
-                        >
-                            <HomePanelBase id="base" withoutEpic={false}/>
-                            <HomePanelGroups id="groups"/>
-                        </View>
-                    </Root>
-                    <Root id="more" activeView={activeView} popout={popout}>
-                        <View
-                            id="more"
-                            modal={homeModals}
-                            activePanel={getActivePanel("more")}
-                            history={history}
-                            onSwipeBack={() => goBack()}
-                        >
-                            <MorePanelBase id="callmodal"/>
-                        </View>
-                        <View
-                            id="modal"
-                            modal={homeModals}
-                            activePanel={getActivePanel("modal")}
-                            history={history}
-                            onSwipeBack={() => goBack()}
-                        >
-                            <MorePanelExample id="filters"/>
-                        </View>
-                    </Root>
-                </Epic>
+                <Root activeView={activeView} popout={popout}>
+                    <View
+                        id="home"
+                        modal={homeModals}
+                        activePanel={getActivePanel("home")}
+                        history={history}
+                        onSwipeBack={() => goBack()}
+                    >
+                        <HomePanelProfile id="base" withoutEpic={true}/>
+                        <HomePanelGroups id="groups"/>
+                    </View>
+                    <View
+                        id="modal"
+                        modal={homeModals}
+                        activePanel={getActivePanel("modal")}
+                        history={history}
+                        onSwipeBack={() => goBack()}
+                    >
+                        <MorePanelExample id="filters"/>
+                    </View>
+                </Root>
             </ConfigProvider>
         );
     }
@@ -147,7 +119,7 @@ const mapStateToProps = (state) => {
 function mapDispatchToProps(dispatch) {
     return {
         dispatch,
-        ...bindActionCreators({setStory, goBack, closeModal}, dispatch)
+        ...bindActionCreators({goBack, closeModal}, dispatch)
     }
 }
 

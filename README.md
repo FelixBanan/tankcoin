@@ -1,34 +1,93 @@
-[<img width="134" src="https://vk.com/images/apps/mini_apps/vk_mini_apps_logo.svg">](https://vk.com/services)
+# VK Mini App Boilerplate
+**Стартовый кит для создания сервиса на платформе VK Mini Apps.**
 
-# Create VK Mini App [![npm][npm]][npm-url] [![deps][deps]][deps-url]
+Чтобы понимать, что здесь происходит вы должны знать что такое VK Mini Apps,  ReactJS и React Redux.
 
-## How to install
+[Документация по VK Mini Apps](https://vk.com/dev/vk_apps_docs)
 
-### Create VK Mini App with gh-pages deploy
+[Документация по ReactJS](https://ru.reactjs.org/docs/getting-started.html)
 
-`npx @vkontakte/create-vk-mini-app <app-directory-name>`
+[Документация по React Redux](https://rajdee.gitbooks.io/redux-in-russian/content/)
 
-### Create VK Mini App with Zeit deploy
+## Установка:
+`git clone git://github.com/iSa1vatore/vk-mini-app-boilerplate.git <folder name>`
 
-Firstly, you have to create Zeit account and connect it with your GitHub profile — https://zeit.co/
+Перейдите в созданную папку и выполните команды: `npm install` и `npm start`, последняя запустит сервер для разработки на `localhost:10888`
 
-`npx @vkontakte/create-vk-mini-app <app-directory-name> --zeit`
+Отлично, теперь перед нами демонстративное приложение, можно править код и все изменения сразу будут видны на нашем сервере при помощи "Hot Reloading".
 
-### Create VK Mini App with Surge deploy
+## KIT:
+#### Что реализовано:
+- Поддержка темы нативного клиента
+- Поддержка iOS swipe back для панелей
+- Обработка хардверной кнопки "назад" для Android
+- Сохранение позиции скролла для панелей и элементов
+- Scroll To Top при нажатии на иконку в Epic`e
+- Получение токена пользователя
+- Запросы к API ВКонтакте
+- Сохранение данных в форме при смене панели
+- Роутер
 
-Firstly, you have to create Surge account and Surge-domain — https://surge.sh/
+#### Роутер:
+Действия которые роутер может выполнить:
+- `setStory(story, initial_panel)` - Устанавливает активную Story у Epic'a, View и активную панель.
+- `setPage(view, panel)` - Устанавливает активный View и Panel
+- `goBack(from)` - Совершает действие назад, будь то закрытие модального окна, переход на прошлую панель, закрытие попапа и т.п;
+- `openPopout(popout)` -  Открывает поппап.
+- `closePopout()` - Закрывает поппап.
+- `openModal(id)` - Открывает модальную страницу по её ID.
+- `closeModal()` - Закрывает модальную страницу или открывает прошлую страницу.
 
-`npx @vkontakte/create-vk-mini-app <app-directory-name> --surge <surge-domain>`
+Примеры того как это все работает смотрите в исходниках ¯\_(ツ)_/¯, там все просто.
 
-## How to start work with app
+#### Сохранение позиции скролла:
+Для сохранения позиции горизонтального скоролла нужно:
 
-Go to created folder and run:
-`yarn start` || `npm start` — this will start dev server with hot reload on `localhost:10888`.
+- Указать ID для элемента HorizontalScroll
+```javascript
+<HorizontalScroll id="EXAMPLE_TABS_LIST">
+...
+</HorizontalScroll>
+```
+- Сохранить позицию при демонтировании
+```javascript
+componentWillUnmount() {
+    const {setScrollPositionByID} = this.props;
 
-`yarn run build` || `npm run build` — this will build production bundle, with tree-shaking, uglify and all this modern fancy stuff
+    setScrollPositionByID("EXAMPLE_TABS_LIST");
+}
+```
+- Восстановить позицию при монтировании
+```javascript
+componentDidMount() {
+    restoreScrollPosition();
+}
+```
+Пример находится в файле: [`/src/js/panels/more/base.js`](https://github.com/iSa1vatore/vk-mini-app-boilerplate/blob/master/src/js/panels/more/base.js)
+#### Важно:
+В файле index.js на 24 стороке указывается стартовая панель приложения:
+```javascript
+store.dispatch(setStory('home', 'base'));
+```
+В данном случае это значит, что приложение запустится с:
 
-[npm]: https://img.shields.io/npm/v/@vkontakte/create-vk-mini-app.svg
-[npm-url]: https://npmjs.com/package/@vkontakte/create-vk-mini-app
+`activeStory: home`
 
-[deps]: https://img.shields.io/david/vkcom/create-vk-mini-app.svg
-[deps-url]: https://david-dm.org/vkcom/create-vk-mini-app
+`activeView: home`
+
+`activePanel: base`
+
+Как вы поняли значение ID у Root и стартового View должны совпадать.
+
+В проекте есть 2 файла: "App" и "AppWithoutEpic", первый идет с навигационной панелью Epic, второй без, он подойдет для простых приложений.
+```javascript
+import App from './App';
+```
+По умолчанию для примера выбран вариант с Epic навигацией.
+
+В файле по пути [`/src/js/services/VK.js`](https://github.com/iSa1vatore/vk-mini-app-boilerplate/blob/master/src/js/services/VK.js) нужно заменить значение константы `APP_ID` на ID вашего приложения
+
+
+Демо: [vk.com/app6984089](https://vk.com/app6984089)
+
+Мой VK (вопросы, предложения): [Ivan Salvatore](https://vk.com/s9008)
